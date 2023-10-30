@@ -1,0 +1,174 @@
+# Interview Procedure
+
+## Introduction (5 mins)
+1. Introduction of ourselves
+2. Self-introduction of the interviewee
+3. Brief intro to the topic of the session
+4. Comfirm the expertise area of the candiate
+
+## Find the number of connected islands in the grid map ( 30 mins  )
+
+The goal of this question is to mainly evaluate the candidate's coding on data structure understanding, passing by reference, recursion and proper algorithm.
+The candidate should be able to find the right algorithm (e.g. DFS/BFS), compare recursive vs. iterative approaches (for DFS), as well as checking the grid's boundary.
+
+We assume that:
+/**
+    1- the given 2d grid is binary (0 or 1), but you can modifiy it if needed
+    2- for each cell, we consider its 4-directions (top, bottom, left and right) to find a potential connected component.
+    3- a connected component can't expand out of the grid (opposite) boundaries.
+*/
+
+    Example:
+
+{{1, 1, 0, 0, 0},
+    {0, 1, 0, 0, 1},
+    {1, 0, 0, 1, 1},
+    {0, 0, 0, 0, 0},
+    {1, 0, 1, 1, 1}}
+
+output: 5
+
+here each component is marked by a number to distinguish different connected components:
+
+{1, 1, 0, 0, 0},
+{0, 1, 0, 0, 2},
+{3, 0, 0, 2, 2},
+{0, 0, 0, 0, 0},
+{4, 0, 5, 5, 5}
+
+
+## Index the Islands ( 10 mins  )
+1. Besides just calculating the no. of islands, one needs to index the islands identified.
+2. Print out the indexed gridmap to verify the result.
+
+## Find the Shortest Path to a Specific Island ( 10 mins  ) [don't have to implement if not enough time left]
+1. Imagine we put a person on the map, the person can walk and swim. What is the shortest path from the location of the person to an island of interest?
+2. If 1. is done, then how to get the shortest path instead of just the distance?
+
+## Questions about us? (5 mins)
+
+====================================================
+SAMPLE IMPLEMENTATION:
+
+Solution 1 :  DFS
+
+```
+#include <iostream>
+#include <vector>
+
+std::vector<std::vector<std::size_t>> gridmap
+{{1, 1, 0, 0, 0},
+    {0, 1, 0, 0, 1},
+    {1, 0, 0, 1, 1},
+    {0, 0, 0, 0, 0},
+    {1, 0, 1, 1, 1}};
+
+void dfs(std::vector<std::vector<std::size_t>> &grid, const int r, const int c){
+    // we set the value of [r,c] to zero to avoid double counting
+    grid[r][c] = 0;
+    int nr = grid.size();
+    int nc = grid[0].size();
+    // check the 4-way neighbor of [r,c], if any is "1", recursively process it (set to zero)- and go on
+    // must check the boundary of the array- to avoid out of memory
+    if(r-1 >= 0 && grid[r-1][c] == 1 )
+        dfs(grid, r-1, c);
+    if(c-1 >= 0 && grid[r][c-1] == 1 )
+        dfs(grid, r, c-1);
+    if(r+1 < nr && grid[r+1][c] == 1 )
+        dfs(grid, r+1, c);
+    if(c+1 <nc && grid[r][c+1] == 1 )
+        dfs(grid, r, c+1);
+
+
+}
+
+std::size_t numIslands(std::vector<std::vector<std::size_t>>& grid) {
+    int row = grid.size();
+    if (!row)
+        return 0;
+    int col = grid[0].size();
+    int num_islands = 0;
+
+    for(int r = 0; r < row; ++r){
+        for(int c = 0; c < col; ++c){
+            if (grid[r][c] == 1){
+                num_islands++;
+                dfs(grid, r, c);
+
+
+            }//if
+
+
+        }//for
+
+
+    }//for
+
+    return num_islands;
+
+}
+
+
+int main() {
+    const std::size_t noIslands = numIslands(gridmap);
+
+    std::cout << "No. of islands is " << noIslands << '\n';
+
+    return 0;
+
+}
+```
+
+Solution 2 :  BFS
+
+```
+int numIslands(vector<vector<char>>& grid) {
+    int nr = grid.size();
+    if (!nr) return 0;
+    int nc = grid[0].size();
+
+    int num_islands = 0;
+    for (int r = 0; r < nr; ++r) {
+        for (int c = 0; c < nc; ++c) {
+            if (grid[r][c] == '1') {
+                ++num_islands;
+                grid[r][c] = '0';
+                queue<pair<int, int>> neighbors;
+                neighbors.push({r, c});
+                while (!neighbors.empty()) {
+                    auto rc = neighbors.front();
+                    neighbors.pop();
+                    int row = rc.first, col = rc.second;
+                    if (row - 1 >= 0 && grid[row-1][col] == '1') {
+                        neighbors.push({row-1, col});
+                        grid[row-1][col] = '0';
+
+                    }
+                    if (row + 1 < nr && grid[row+1][col] == '1') {
+                        neighbors.push({row+1, col});
+                        grid[row+1][col] = '0';
+
+                    }
+                    if (col - 1 >= 0 && grid[row][col-1] == '1') {
+                        neighbors.push({row, col-1});
+                        grid[row][col-1] = '0';
+
+                    }
+                    if (col + 1 < nc && grid[row][col+1] == '1') {
+                        neighbors.push({row, col+1});
+                        grid[row][col+1] = '0';
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return num_islands;
+
+}
+```
